@@ -10,11 +10,28 @@ exports.handler = async function(event) {
   //          in the POST request, and assign to variables. Use
   //          console.log if necessary, to ensure the values are what
   //          you're expecting.
+
+  console.log(event.body)
+  let post = JSON.parse(event.body)
+  console.log(post)
+
+  let userId = post.userId
+  let userName = post.userName
+  let imageUrl = post.imageUrl
+
   // Step 3:  Construct an object of data which you will send to Firestore
   //          in step 4 – this object should include the user ID, username,
   //          image URL, and a "created" timestamp – use the built-in
   //          function for this:
   //          firebase.firestore.FieldValue.serverTimestamp()
+
+  let newPost = {
+    userId: userId,
+    userName: userName,
+    imageUrl: imageUrl,
+    created: firebase.firestore.FieldValue.serverTimestamp(),
+    likes: 0
+  }
   // Step 4:  Add the post to Firestore using the .add() function.
   // Step 5:  Assign the newly created post's auto-generated ID as an
   //          id attribute of the object you created in step 3 - to assign
@@ -22,10 +39,11 @@ exports.handler = async function(event) {
   //          Also add a likes attribute to the object with a value of 0
   //          (since a new post has 0 likes to start) - return the entire
   //          object as the body in the return value, using JSON.stringify()
-
+let docRef = await db.collection('posts').add(newPost)
+newPost.postId = docRef.id
   return {
     statusCode: 200,
-    body: JSON.stringify({})
+    body: JSON.stringify(newPost)
   }
 
 }

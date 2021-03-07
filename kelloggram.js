@@ -22,6 +22,15 @@ firebase.auth().onAuthStateChanged(async function(user) {
       // Step 1:    POST fetch the create_post endpoint. Send the currently logged-in
       //            user's uid and username, and the image URL from the form in the
       //            POST request's body.
+      let response = await fetch('/.netlify/functions/create_post', {
+        method: 'POST',
+        body: JSON.stringify({
+          userId: user.uid,
+          userName: postUsername,
+          imageUrl: postImageUrl,
+        })
+      })
+      console.log(response)
       // Step 2-5:  Implement the lambda function in create_post.js
       // Step 6:    The lambda should return an Object of data with information on the
       //            the post, including the newly created post's id and likes. Use this
@@ -32,7 +41,7 @@ firebase.auth().onAuthStateChanged(async function(user) {
       // Challenge: Add functionality for users to comment on posts.
       // 🔥🔥🔥 End Lab
       document.querySelector('#image-url').value = '' // clear the image url field
-      renderPost(postId, postUsername, postImageUrl, numberOfLikes)
+      // renderPost(postId, postUsername, postImageUrl, numberOfLikes)
     })
 
     let response = await fetch('/.netlify/functions/get_posts')
@@ -104,14 +113,27 @@ async function renderPost(postId, username, imageUrl, likes) {
     //            Send the post's id and the user's id along in the body of the request
     //            so that the backend can create the like for the correct post/user combination.
     //            Be sure to use `JSON.stringify()` for the body object.
+
+    let response = await fetch('/.netlify/functions/like', {
+      method: 'POST',
+      body: JSON.stringify({
+        postId: postId,
+        userId: currentUserId
+      })
+    })
+    console.log(response)
+
     // Step 2-5:  Implement the lambda function in like.js
     // Step 6:    Wrap the code below that visually increments the likes count in conditional logic
     //            so that it doesn't increment unless the backend added the like. Use either
     //            the response's body or the status code.
-    // 🔥🔥🔥 End Code-Along
 
-    let existingNumberOfLikes = document.querySelector(`.post-${postId} .likes`).innerHTML
-    let newNumberOfLikes = parseInt(existingNumberOfLikes) + 1
-    document.querySelector(`.post-${postId} .likes`).innerHTML = newNumberOfLikes
+    if (response.ok) {
+      let existingNumberOfLikes = document.querySelector(`.post-${postId} .likes`).innerHTML
+      let newNumberOfLikes = parseInt(existingNumberOfLikes) + 1
+      document.querySelector(`.post-${postId} .likes`).innerHTML = newNumberOfLikes
+    }
+
+    // 🔥🔥🔥 End Code-Along
   })
 }
